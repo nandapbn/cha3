@@ -1,0 +1,37 @@
+name: Selenium Grid on Docker
+
+on: workflow_dispatch
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Docker
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y docker.io
+        sudo docker pull selenium/hub
+        sudo docker pull selenium/node-chrome
+        sudo docker pull selenium/node-firefox
+        sudo docker network create grid
+      env:
+        DOCKER_CLI_APT_RECOMMENDS: "false"
+        DOCKER_CLI_APT_USE_CACHE: "false"
+
+    - name: Start Selenium Grid
+      run: |
+        sudo docker run -d -p 4444:4444 --net grid --name selenium-hub selenium/hub
+        sudo docker run -d --net grid -e HUB_HOST=selenium-hub --name selenium-node-chrome selenium/node-chrome
+        sudo docker run -d --net grid -e HUB_HOST=selenium-hub --name selenium-node-firefox selenium/node-firefox
+      env:
+        SELENIUM_OPTS: -Dwebdriver.chrome.driver=/usr/bin/chromedriver
+
+    - name: Run your tests
+      run: |
+        # Replace this with the command to run your Selenium tests
+      env:
+        SELENIUM_HUB: http://selenium-hub:4444/grid/register/
