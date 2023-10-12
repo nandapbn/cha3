@@ -13,6 +13,7 @@ jobs:
     - name: Set up Docker
       run: |
         sudo apt-get update
+        sudo apt-get remove containerd.io
         sudo apt-get install -y docker.io
         sudo docker pull selenium/hub
         sudo docker pull selenium/node-chrome
